@@ -1,3 +1,6 @@
+#ifndef FCFS_SCHEDULER_H
+#define FCFS_SCHEDULER_H
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -26,7 +29,7 @@ public:
     }
 };
 
-class FCFSScheduler {
+class FCFS_Scheduler {
 private:
     vector<Process> processes;
     vector<pair<int, int>> ganttChart; // {process_id, end_time}
@@ -58,7 +61,7 @@ public:
             
             // Calculate turnaround and waiting time
             p.turnaroundTime = p.completionTime - p.arrivalTime;
-            p.waitingTime = p.turnaroundTime - p.burstTime;
+            p.waitingTime = p.startTime - p.arrivalTime; // Fixed: waiting time = start - arrival
             
             // Add to Gantt chart
             ganttChart.push_back({p.id, p.completionTime});
@@ -73,7 +76,7 @@ public:
         cout << "-----------" << endl;
         
         // Print top border
-        for (int i = 0; i < ganttChart.size(); i++) {
+        for (size_t i = 0; i < ganttChart.size(); i++) { // Fixed: use size_t
             cout << "-------";
         }
         cout << "-" << endl;
@@ -86,15 +89,17 @@ public:
         cout << endl;
         
         // Print bottom border
-        for (int i = 0; i < ganttChart.size(); i++) {
+        for (size_t i = 0; i < ganttChart.size(); i++) { // Fixed: use size_t
             cout << "-------";
         }
         cout << "-" << endl;
         
         // Print time points
+        int lastTime = 0;
         cout << "0";
         for (const auto &entry : ganttChart) {
             cout << setw(7) << entry.second;
+            lastTime = entry.second;
         }
         cout << endl;
     }
@@ -126,11 +131,20 @@ public:
         int totalBurstTime = 0;
         int n = processes.size();
         
+        if (n == 0) { // Added: check for empty process list
+            cout << "\nNo processes to calculate metrics." << endl;
+            return;
+        }
+        
         for (const auto &p : processes) {
             if (p.completionTime > totalTime) {
                 totalTime = p.completionTime;
             }
             totalBurstTime += p.burstTime;
+        }
+        
+        if (totalTime == 0) { // Added: prevent division by zero
+            totalTime = 1;
         }
         
         double cpuUtilization = (double)totalBurstTime / totalTime * 100;
@@ -145,22 +159,4 @@ public:
     }
 };
 
-int main() {
-    FCFSScheduler scheduler;
-    
-    // Add processes: ID, Arrival Time, Burst Time
-    scheduler.addProcess(1, 0, 5);
-    scheduler.addProcess(2, 1, 3);
-    scheduler.addProcess(3, 2, 8);
-    scheduler.addProcess(4, 3, 6);
-    
-    // Calculate scheduling
-    scheduler.calculateFCFS();
-    
-    // Display results
-    scheduler.printResults();
-    scheduler.printGanttChart();
-    scheduler.printPerformanceMetrics();
-    
-    return 0;
-}
+#endif
