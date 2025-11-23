@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/jahma/Desktop/Utech/Y3SEM1/Operating Systems/Group Assignment/OS_Scheduling/Operating-System-Scheduling-Algorithms-simulation-/src",
-      "program": "c:/Users/jahma/Desktop/Utech/Y3SEM1/Operating Systems/Group Assignment/OS_Scheduling/Operating-System-Scheduling-Algorithms-simulation-/src/build/Debug/outDebug",
+      "cwd": ".",
+      "program": "build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

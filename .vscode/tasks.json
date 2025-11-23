@@ -2,16 +2,16 @@
   "tasks": [
     {
       "type": "cppbuild",
-      "label": "C/C++: gcc.exe build all files",
-      "command": "C:/msys64/ucrt64/bin/g++.exe",
+      "label": "C/C++: g++.exe build all files",
+      "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
       "args": [
         "-fdiagnostics-color=always",
         "-g",
-        "${workspaceFolder}/main.cpp",
-        "${workspaceFolder}/SJF_Scheduler.cpp",
+        "-std=c++11",
+        "${workspaceFolder}/src/main.cpp",
+        "${workspaceFolder}/src/SJF_Scheduler.cpp",
         "-o",
-        "${workspaceFolder}/build/${workspaceFolderBasename}.exe",
-        "-I", "${workspaceFolder}"
+        "${workspaceFolder}/src/main.exe"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
