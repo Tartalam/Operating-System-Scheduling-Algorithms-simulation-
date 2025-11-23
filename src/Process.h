@@ -1,0 +1,64 @@
+//Author: Jahmari Harrison
+//Date: 2023-10-03
+//Description: Header file for Process class definition.
+//ID: 2304204
+#ifndef PROCESS_H
+#define PROCESS_H
+
+#include <string>
+#include<functional>
+
+using namespace std;
+
+class Process {
+private:
+    string processId;   // Process ID
+    int arrivalTime;   // Arrival Time
+    int burstTime;     // Burst Time
+    int prority;      // Priority (if needed)
+    int completionTime; // Completion Time
+    int waitingTime;    // Waiting Time
+    int turnaroundTime; // Turnaround Time
+    int throughput;      // Throughput
+    int cpuUtilization; // CPU Utilization
+    int responseTime;   // Response Time
+    
+
+public:
+
+    //constructor
+    Process(string processId, int arrivalTime, int burstTime, int Priority);
+    // Getters
+    string getProcessId() const;
+    int getArrivalTime() const;
+    int getBurstTime() const;
+    int getPriority() const;
+    int getCompletionTime() const;
+    int getWaitingTime() const;
+    int getTurnaroundTime() const;
+    int getResponseTime() const;
+
+    // Setters
+    void setCompletionTime(int time);
+    void setWaitingTime(int time);
+    void setTurnaroundTime(int time);
+    void setResponseTime(int time);
+
+    // Display process information
+    void displayProcessInfo() const;
+    void displayProcessInfoNoPriority() const;
+
+};
+
+//Comparison function for sorting processes by burst time
+struct CompareBurstTime
+{
+  bool operator()(const Process &p1, const Process &p2)
+  {
+    //lower burst time has higher priority
+    return p1.getBurstTime() > p2.getBurstTime();
+  }
+};
+
+
+#endif // PROCESS_H
