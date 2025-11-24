@@ -5,6 +5,7 @@
 
 #include "SJFScheduler.h"
 #include "Process.h"
+#include "FCFS_Scheduler.h"
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -71,7 +72,7 @@ void Process::displayProcessInfoNoPriority() const {
 
 //SJFScheduler Class Implementation
 SJFScheduler::SJFScheduler() {}
-
+// FCFS_Scheduler::FCFS_Scheduler() : SJFScheduler() {}
 void SJFScheduler::addProcess(const Process& process){
   processes.push_back(process);
 }
@@ -180,6 +181,7 @@ void SJFScheduler::calculateTimesWithPriorityQueue() {
   setTotalExecutionTime(totalTime);
 }
 
+//execute scheduling using SJF algorithm with priority queue
 void SJFScheduler::executeScheduling() {
 
   if (processes.empty()) {
@@ -193,6 +195,62 @@ void SJFScheduler::executeScheduling() {
   calculateTimesWithPriorityQueue();
 
 }
+
+void FCFS_Scheduler::executeScheduling() {
+    if (processes.empty()) {
+        cout << "No processes to schedule." << endl;
+        return;
+    }
+    
+    completedProcesses.clear();
+    calculateFCFS();
+    
+    // Use the inherited performance metrics display
+    printPerformanceMetrics();
+}
+
+void FCFS_Scheduler::calculateFCFS() {
+    // Sort processes by arrival time
+    sort(processes.begin(), processes.end(), 
+         [](const Process &a, const Process &b) {
+             return a.getArrivalTime() < b.getArrivalTime();
+         });
+    
+    int currentTime = 0;
+    int trackIdleTime = 0;
+    
+    for (auto &p : processes) {
+        // If CPU is idle, jump to process arrival time
+        if (currentTime < p.getArrivalTime()) {
+            int idleDuration = p.getArrivalTime() - currentTime;
+            trackIdleTime += idleDuration;
+            currentTime = p.getArrivalTime();
+        }
+        
+        // Calculate times
+        int completionTime = currentTime + p.getBurstTime();
+        int turnaroundTime = completionTime - p.getArrivalTime();
+        int waitingTime = turnaroundTime - p.getBurstTime();
+        int responseTime = currentTime - p.getArrivalTime();
+        
+        // Create a copy and set calculated times
+        Process completedProcess = p;
+        completedProcess.setCompletionTime(completionTime);
+        completedProcess.setWaitingTime(waitingTime);
+        completedProcess.setTurnaroundTime(turnaroundTime);
+        completedProcess.setResponseTime(responseTime);
+        
+        completedProcesses.push_back(completedProcess);
+        
+        // Update current time for next process
+        currentTime = completionTime;
+    }
+    
+    totalExecutionTime = currentTime;
+    idleTime = trackIdleTime;
+}
+
+
 
 void SJFScheduler::printProcessInfo() const {
   if (completedProcesses.empty()) {

@@ -14,7 +14,7 @@
 using namespace std;
 
 class SJFScheduler {
-private:
+protected:
     vector<Process> processes; // List of processes
     vector<Process> completedProcesses; // List of completed processes
 
