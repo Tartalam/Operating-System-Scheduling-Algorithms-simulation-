@@ -1,0 +1,150 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class Process {
+public:
+    int Id;
+    int arrivalTime;
+    int burstTime;
+    int priority;
+    int remainingTime;
+    int startTime;
+    int completionTime;
+    int turnaroundTime;
+    int waitingTime;
+    int responseTime;
+
+    Process(int id, int arrival, int burst, int priority) {
+        this->Id = id;
+        this->arrivalTime = arrival;
+        this->burstTime = burst;
+        this->priority = priority;
+        this->remainingTime = burst;
+        this->startTime = -1;
+        this->completionTime = 0;
+        this->turnaroundTime = 0;
+        this->waitingTime = 0;
+        this->responseTime = 0;
+    }
+};
+
+class PPScheduler {
+private:
+    vector<Process> processes;
+
+public:
+    void addProcesses() {
+        int n;
+        cout << "Enter number of processes: ";
+        cin >> n;
+        for (int i = 0; i < n; i++) {
+            int at, bt, prio;
+            cout << "Process " << i + 1 << " Arrival Time: ";
+            cin >> at;
+            cout << "Process " << i + 1 << " Burst Time: ";
+            cin >> bt;
+            cout << "Process " << i + 1 << " Priority (lower = higher): ";
+            cin >> prio;
+            
+			processes.push_back(Process(i + 1, at, bt, prio));
+        }
+    }
+
+    void calculatePPS() {
+        int completed = 0;
+        int time = 0;
+        int n = processes.size();
+        
+        cout << "\nRunning Preemptive Priority Scheduling...\n";
+
+        while (completed != n) {
+            int current = -1;
+            int bestPriority = 100000;
+
+            // Find process with highest priority that has arrived
+            for (int i = 0; i < n; i++) {
+                if (processes[i].arrivalTime <= time && processes[i].remainingTime > 0) {
+                    if (processes[i].priority < bestPriority) {
+                        bestPriority = processes[i].priority;
+                        current = i;
+                    }
+                }
+            }
+
+			if (current != -1) {
+                Process &p = processes[current];
+
+                if (p.startTime == -1)
+                    p.startTime = time;
+
+                p.remainingTime--;
+
+                if (p.remainingTime == 0) {
+                    p.completionTime = time + 1;
+                    p.turnaroundTime = p.completionTime - p.arrivalTime;
+                    p.waitingTime = p.turnaroundTime - p.burstTime;
+                    p.responseTime = p.startTime - p.arrivalTime;
+                    completed++;
+                }
+            }
+            
+            time++;
+        }
+    }
+
+    void printResults() {
+        cout << "\nProcess\tAT\tBT\tP\tST\tCT\tTAT\tWT\n";
+        for (auto &p : processes) {
+            cout << "P" << p.Id << "\t" << p.arrivalTime << "\t" << p.burstTime
+                 << "\t" << p.priority << "\t" << p.startTime << "\t" << p.completionTime
+                 << "\t" << p.turnaroundTime << "\t" << p.waitingTime << "\n";
+        }
+    }
+
+    void printPerformanceMetrics() {
+        int n = processes.size();
+        double totalWT = 0, totalTAT = 0, totalRT = 0;
+
+        int firstArrival = processes[0].arrivalTime;
+        int lastCompletion = processes[0].completionTime;
+        int totalBurst = 0;
+
+        for (auto &p : processes) {
+            totalWT += p.waitingTime;
+            totalTAT += p.turnaroundTime;
+            totalRT += p.responseTime;
+
+            if (p.arrivalTime < firstArrival)
+                firstArrival = p.arrivalTime;
+
+            if (p.completionTime > lastCompletion)
+                lastCompletion = p.completionTime;
+
+            totalBurst += p.burstTime;
+        }
+
+        int makespan = lastCompletion - firstArrival;
+        double cpuUtilization = (double)totalBurst / lastCompletion * 100.0;
+        double throughput = (double)n / makespan;
+
+        cout << "\nPerformance Metrics:\n";
+        cout << "Average Turnaround Time: " << totalTAT / n << endl;
+        cout << "Average Waiting Time: " << totalWT / n << endl;
+        cout << "Average Response Time: " << totalRT / n << endl;
+        cout << "Makespan: " << makespan << endl;
+        cout << "Total Execution Time: " << lastCompletion << endl;
+        cout << "CPU Utilization (%): " << cpuUtilization << endl;
+        cout << "Throughput (processes/unit time): " << throughput << endl;
+    }
+};
+
+int main() {
+    PPScheduler scheduler;
+    scheduler.addProcesses();
+    scheduler.calculatePPS();
+    scheduler.printResults();
+    scheduler.printPerformanceMetrics();
+    return 0;
+}
