@@ -6,6 +6,7 @@
 #include "SJFScheduler.h"
 #include "Process.h"
 #include "FCFS_Scheduler.h"
+#include "PP_Scheduler.h"
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -95,6 +96,16 @@ void SJFScheduler::clearProcesses(){
   //     readyQueue.pop();
   // }
   readyQueue = priority_queue<Process, vector<Process>, CompareBurstTime>();
+}
+
+void SJFScheduler::clearProcessesPP(){
+  processes.clear();
+  completedProcesses.clear();
+  // Clear the priority queue creating a new empty one
+  // while (!readyQueue.empty()) {
+  //     readyQueue.pop();
+  // }
+  readyQueuePP = priority_queue<Process, vector<Process>, ComparePriority>();
 }
 
 void SJFScheduler::sortByArrivalTime() {
@@ -196,6 +207,214 @@ void SJFScheduler::executeScheduling() {
 
 }
 
+void PP_Scheduler::calculatePP() {
+    if (processes.empty()) return;
+
+    // Sort processes by arrival time
+    sortByArrivalTime();
+
+    vector<Process> tempProcesses = processes; // Copy of processes to manipulate
+    vector<int> remainingTime(tempProcesses.size()); // Track remaining burst time
+    vector<bool> started(tempProcesses.size(), false); // Track if process has started
+    vector<int> startTime(tempProcesses.size(), -1); // Track when each process first started
+
+    // Initialize remaining times
+    for (int i = 0; i < tempProcesses.size(); i++) {
+        remainingTime[i] = tempProcesses[i].getBurstTime();
+    }
+
+    int currentTime = 0;
+    int completedCount = 0;
+    int n = tempProcesses.size();
+    int trackIdleTime = 0;
+    
+    Process* currentProcess = nullptr;
+    int currentProcessIndex = -1;
+    int previousTime = 0;
+
+    cout << "Starting Preemptive Priority Scheduling..." << endl;
+    cout << "Execution Order: ";
+
+    
+
+    while (completedCount < n) {
+        // Add all processes that have arrived by currentTime to the ready queue
+        for (int i = 0; i < n; i++) {
+            if (tempProcesses[i].getArrivalTime() <= currentTime && 
+                remainingTime[i] > 0) {
+                // Process will be automatically sorted by priority in the queue
+                bool alreadyInQueue = false;
+                
+                // Create a temporary queue to check if process is already in queue
+                auto tempQueue = readyQueuePP;
+                while (!tempQueue.empty()) {
+                    if (tempQueue.top().getProcessId() == tempProcesses[i].getProcessId()) {
+                        alreadyInQueue = true;
+                        break;
+                    }
+                    tempQueue.pop();
+                }
+                
+                if (!alreadyInQueue) {
+                    readyQueuePP.push(tempProcesses[i]);
+                }
+            }
+        }
+
+        if (!readyQueuePP.empty()) {
+            // Get the process with the highest priority (lowest priority number)
+            Process nextProcess = readyQueuePP.top();
+            readyQueuePP.pop();
+            
+            // Find the index of the next process
+            int nextIndex = -1;
+            for (int i = 0; i < n; i++) {
+                if (tempProcesses[i].getProcessId() == nextProcess.getProcessId() && 
+                    remainingTime[i] > 0) {
+                    nextIndex = i;
+                    break;
+                }
+            }
+            
+            if (nextIndex == -1) continue;
+
+            // If a different process is being scheduled, show the transition
+            if (currentProcess == nullptr || 
+                currentProcess->getProcessId() != tempProcesses[nextIndex].getProcessId()) {
+                
+                if (currentProcess != nullptr) {
+                    // Show completion of previous process segment
+                    cout << currentProcess->getProcessId() << "(" << previousTime << "-" << currentTime << ") ";
+
+                    //record the completed segment of the previous process
+                    executionHistory.push_back(make_pair(tempProcesses[nextIndex].getProcessId(), 
+                                   make_pair(previousTime, currentTime)));
+                }
+                
+                currentProcess = &tempProcesses[nextIndex];
+                currentProcessIndex = nextIndex;
+                previousTime = currentTime;
+                
+                // Set response time when process first starts
+                if (!started[nextIndex]) {
+                    startTime[nextIndex] = currentTime;
+                    started[nextIndex] = true;
+                }
+            }
+
+            // Execute the process for 1 time unit (preemptive)
+            remainingTime[nextIndex]--;
+            currentTime++;
+
+            // record the final segment of the process execution
+            executionHistory.push_back(make_pair(tempProcesses[nextIndex].getProcessId(), 
+                                   make_pair(previousTime, currentTime)));
+
+            // Check if process completed
+            if (remainingTime[nextIndex] == 0) {
+                completedCount++;
+                
+                // Calculate completion time and other metrics
+                int completionTime = currentTime;
+                int turnaroundTime = completionTime - tempProcesses[nextIndex].getArrivalTime();
+                int waitingTime = turnaroundTime - tempProcesses[nextIndex].getBurstTime();
+                int responseTime = startTime[nextIndex] - tempProcesses[nextIndex].getArrivalTime();
+
+                // Update the process with calculated times
+                tempProcesses[nextIndex].setCompletionTime(completionTime);
+                tempProcesses[nextIndex].setWaitingTime(waitingTime);
+                tempProcesses[nextIndex].setTurnaroundTime(turnaroundTime);
+                tempProcesses[nextIndex].setResponseTime(responseTime);
+                
+                completedProcesses.push_back(tempProcesses[nextIndex]);
+                
+                // Show completion
+                cout << tempProcesses[nextIndex].getProcessId() << "(" << previousTime << "-" << currentTime << ") ";
+                
+                currentProcess = nullptr;
+                currentProcessIndex = -1;
+            } else if(!readyQueuePP.empty() && readyQueuePP.top().getPriority() < currentProcess->getPriority()) {
+                //current process is preempted by higher priority process
+                executionHistory.push_back(make_pair(currentProcess->getProcessId(), 
+                                                   make_pair(previousTime, currentTime)));
+                
+            }
+        } else {
+            // CPU idle - no process in ready queue
+            if (completedCount < n) {
+                // Find next arriving process
+                int nextArrival = INT_MAX;
+                for (int i = 0; i < n; i++) {
+                    if (remainingTime[i] > 0 && tempProcesses[i].getArrivalTime() > currentTime) {
+                        nextArrival = min(nextArrival, tempProcesses[i].getArrivalTime());
+                    }
+                }
+                
+                if (nextArrival != INT_MAX) {
+                    int idleDuration = nextArrival - currentTime;
+                    trackIdleTime += idleDuration;
+                    
+                    // Show idle time
+                    cout << "IDLE(" << currentTime << "-" << nextArrival << ") ";
+                    
+                    currentTime = nextArrival;
+                } else {
+                    break; // Should not happen
+                }
+            }
+        }
+    }
+
+    // Handle the last process segment if any
+    if (currentProcess != nullptr) {
+        cout << currentProcess->getProcessId() << "(" << previousTime << "-" << currentTime << ") ";
+    
+        executionHistory.push_back(make_pair(currentProcess->getProcessId(), 
+                                   make_pair(previousTime, currentTime)));
+      }
+
+    int totalTime = currentTime;
+    
+    cout << "\nPreemptive Priority Scheduling Completed." << endl;
+    setIdleTime(trackIdleTime);
+    setTotalExecutionTime(totalTime);
+}
+
+void PP_Scheduler::executeScheduling() {
+    if (processes.empty()) {
+        cout << "No processes to schedule." << endl;
+        return;
+    }
+
+    executionHistory.clear();
+    
+    completedProcesses.clear();
+    readyQueuePP = priority_queue<Process, vector<Process>, ComparePriority>(); // Clear the priority queue
+    calculatePP();
+}
+
+void PP_Scheduler::displayGanttChart() const {
+    if (executionHistory.empty()) {
+        cout << "No execution history to display Gantt chart." << endl;
+        return;
+    }
+
+    cout << "\nPreemptive Priority Gantt Chart:" << endl;
+    cout << "Time:  ";
+    
+    for (const auto &segment : executionHistory) {
+        cout << "| " << segment.first << " (" << segment.second.first << "-" << segment.second.second << ") ";
+    }
+    cout << "|" << endl;
+    
+    // Also show the timeline
+    cout << "       ";
+    for (const auto &segment : executionHistory) {
+        cout << segment.second.first << "    " << segment.second.second << "   ";
+    }
+    cout << endl;
+}
+
 void FCFS_Scheduler::executeScheduling() {
     if (processes.empty()) {
         cout << "No processes to schedule." << endl;
@@ -206,15 +425,18 @@ void FCFS_Scheduler::executeScheduling() {
     calculateFCFS();
     
     // Use the inherited performance metrics display
-    printPerformanceMetrics();
+    // printPerformanceMetrics();
 }
 
+//method to calculate FCFS scheduling
 void FCFS_Scheduler::calculateFCFS() {
     // Sort processes by arrival time
-    sort(processes.begin(), processes.end(), 
-         [](const Process &a, const Process &b) {
-             return a.getArrivalTime() < b.getArrivalTime();
-         });
+    // sort(processes.begin(), processes.end(), 
+    //      [](const Process &a, const Process &b) {
+    //          return a.getArrivalTime() < b.getArrivalTime();
+    //      });
+
+    sortByArrivalTime();
     
     int currentTime = 0;
     int trackIdleTime = 0;
@@ -248,7 +470,12 @@ void FCFS_Scheduler::calculateFCFS() {
     
     totalExecutionTime = currentTime;
     idleTime = trackIdleTime;
+
+    setIdleTime(idleTime);
+    setTotalExecutionTime(totalExecutionTime);
 }
+
+// calculate Preemptive Priority Scheduling
 
 
 
@@ -308,6 +535,30 @@ void SJFScheduler::printProcessInfoNoPriority() const {
   for (const auto &process : completedProcesses) {
       process.displayProcessInfoNoPriority();
   }
+}
+
+void PP_Scheduler::printProcessInfo() const {
+    if (completedProcesses.empty()) {
+        cout << "No completed processes to display." << endl;
+        return;
+    }
+
+    cout << "Preemptive Priority Scheduling Results:" << endl;
+    cout << string(80, '=') << endl;
+    cout << left << setw(8) << "Process"
+         << setw(12) << "Arrival"
+         << setw(10) << "Burst"
+         << setw(12) << "Priority"
+         << setw(12) << "Waiting"
+         << setw(12) << "Response"
+         << setw(15) << "Turnaround"
+         << setw(16) << "Completion"
+         << endl;
+    cout << string(80, '=') << endl;
+
+    for (const auto &process : completedProcesses) {
+        process.displayProcessInfo();
+    }
 }
 
 
@@ -381,7 +632,7 @@ int SJFScheduler::getIdleTime() const {
 
 //calculates CPU utilization
 float SJFScheduler::getCPUUtilization() const {
-  if (totalExecutionTime == 0) return 0;
+  if (getTotalExecutionTime() == 0) return 0;
   return static_cast<float>(((getTotalExecutionTime() - getIdleTime()) /getTotalExecutionTime()) * 100.0f);
 }
 

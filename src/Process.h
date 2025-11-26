@@ -22,6 +22,7 @@ private:
     int throughput;      // Throughput
     int cpuUtilization; // CPU Utilization
     int responseTime;   // Response Time
+
     
 
 public:
@@ -57,6 +58,15 @@ struct CompareBurstTime
   {
     //lower burst time has higher priority
     return p1.getBurstTime() > p2.getBurstTime();
+  }
+};
+
+struct ComparePriority
+{
+  bool operator()(const Process &p1, const Process &p2)
+  {
+    //lower priority number has higher priority
+    return p1.getPriority() > p2.getPriority();
   }
 };
 

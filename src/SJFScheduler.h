@@ -20,12 +20,13 @@ protected:
 
     // priorit queue (min-heap) for ready processses based on burst time
     priority_queue<Process, vector<Process>, CompareBurstTime> readyQueue;
+    priority_queue<Process, vector<Process>, ComparePriority> readyQueuePP;
 
     //helper methods
     void calculateTimesWithPriorityQueue();
     void sortByArrivalTime();
-    int totalExecutionTime = 0;
-    int idleTime = 0;
+    int totalExecutionTime;
+    int idleTime;
 
 
 public:
@@ -37,6 +38,7 @@ public:
     void addProcess(const string processId, int arrivalTime, int burstTime, int priority);
     void addProcess(const string processId, int arrivalTime, int burstTime);
     void clearProcesses();
+    void clearProcessesPP();
 
     //scheduling operations
     void executeScheduling();
