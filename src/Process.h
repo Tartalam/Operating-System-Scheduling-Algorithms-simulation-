@@ -22,6 +22,7 @@ private:
     int throughput;      // Throughput
     int cpuUtilization; // CPU Utilization
     int responseTime;   // Response Time
+    int queueLevel;    // Queue Level for Multi-level Queue Scheduling
 
     
 
@@ -44,10 +45,15 @@ public:
     void setWaitingTime(int time);
     void setTurnaroundTime(int time);
     void setResponseTime(int time);
+    //MLQ Getters and Setters
+    int getQueueLevel() const;
+    void setQueueLevel(int level);
 
     // Display process information
     void displayProcessInfo() const;
     void displayProcessInfoNoPriority() const;
+    // Display process information with queue level
+    void displayProcessInfoWithQueueLevel() const;
 
 };
 
