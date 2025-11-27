@@ -8,6 +8,7 @@
 #include "Process.h"
 #include "FCFS_Scheduler.h"
 #include "PP_Scheduler.h"
+#include "MLQ_Scheduler.h"
 
 
 using namespace std;
@@ -26,6 +27,8 @@ void runCustomTest(FCFS_Scheduler& scheduler, bool& returnToPrevious);
 void runAutomatedTest(FCFS_Scheduler& scheduler, bool& returnToPrevious);
 void runCustomTest(PP_Scheduler& scheduler, bool& returnToPrevious);
 void runAutomatedTest(PP_Scheduler& scheduler, bool& returnToPrevious);
+void runCustomTest(MLQ_Scheduler& scheduler, bool& returnToPrevious);
+void runAutomatedTest(MLQ_Scheduler& scheduler, bool& returnToPrevious);
 void clearConsole();
 int getChoiceWithReturn(int minChoice, int maxChoice, bool showReturnOption = false);
 int getPositiveInput(const string& prompt, bool allowZero = false);
@@ -704,7 +707,210 @@ void runAutomatedTest(PP_Scheduler& scheduler, bool& returnToPrevious) {
     }
 }
 
+//MLQ Test Runners to be added here
 
+void runCustomTest(MLQ_Scheduler& scheduler, bool& returnToPrevious) {
+    clearConsole();
+    cout << "CUSTOM TEST - MANUAL PROCESS INPUT\n";
+    cout << "===================================\n\n";
+    
+    // Use the specific queue configuration: 3 queues with time quanta {4, 8, INT_MAX}
+    MLQ_Scheduler mlqScheduler(3, {4, 8, INT_MAX});
+    
+    // Display queue configuration first
+    cout << "Queue Configuration:\n";
+    cout << "Queue 0: RR with quantum = 4 (Highest Priority)\n";
+    cout << "Queue 1: RR with quantum = 8 (Medium Priority)\n";
+    cout << "Queue 2: FCFS (No Time Quantum) (Lowest Priority)\n";
+    cout << endl;
+    
+    int numProcesses = getPositiveInput("Enter number of processes (or 0 to return): ", true);
+    
+    if (numProcesses == 0) {
+        returnToPrevious = true;
+        return;
+    }
+    
+    if (numProcesses < 1) {
+        cout << "Invalid number of processes!\n";
+        cout << "Press Enter to continue...";
+        cin.ignore();
+        cin.get();
+        returnToPrevious = true;
+        return;
+    }
+    
+    for (int i = 1; i <= numProcesses; i++) {
+        string processId = "P" + to_string(i);
+        int arrivalTime, burstTime, priority, queueLevel;
+        
+        cout << "\nProcess " << processId << " (enter -1 for arrival time to cancel):\n";
+        
+        // Get arrival time
+        arrivalTime = getPositiveInput("Arrival Time: ");
+        if (arrivalTime == -1) {
+            returnToPrevious = true;
+            return;
+        }
+        
+        // Get burst time
+        burstTime = getPositiveInput("Burst Time: ");
+        if (burstTime == -1) {
+            returnToPrevious = true;
+            return;
+        }
+        
+        if (burstTime == 0) {
+            cout << "Burst time cannot be zero! Please enter a positive number.\n";
+            i--; // Retry this process
+            continue;
+        }
+        
+        // Get priority
+        priority = getPositiveInput("Priority (>= 0): ");
+        if (priority == -1) {
+            returnToPrevious = true;
+            return;
+        }
+        
+        // Get queue level (0-2 for the 3 queues)
+        cout << "Queue Level (0-2, where 0=highest priority): ";
+        queueLevel = getPositiveInput("", false);
+        while (queueLevel < 0 || queueLevel > 2) {
+            cout << "Invalid queue level! Please enter between 0 and 2: ";
+            queueLevel = getPositiveInput("", false);
+        }
+        
+        // Use MLQ-specific addProcess with queue level
+        mlqScheduler.addProcess(processId, arrivalTime, burstTime, priority, queueLevel);
+        cout << "Added: " << processId << "(" << arrivalTime << "," << burstTime << "," << priority << ",Q" << queueLevel << ")\n";
+    }
+    
+    cout << "\nPress Enter to execute scheduling (or any other key + Enter to cancel)...";
+    cin.ignore();
+    if (cin.get() != '\n') {
+        returnToPrevious = true;
+        return;
+    }
+    
+    mlqScheduler.executeScheduling();
+    mlqScheduler.printProcessInfo();
+    mlqScheduler.displayGanttChart();
+    mlqScheduler.printPerformanceMetrics();
+    
+    // After results are displayed, show return options
+    int returnChoice = displayReturnMenu();
+    switch (returnChoice) {
+        case 1:
+            returnToPrevious = true;
+            break;
+        case 2:
+            returnToPrevious = false; // Will go to main menu
+            break;
+        case 3:
+            exit(0);
+            break;
+    }
+}
+
+void runAutomatedTest(MLQ_Scheduler& scheduler, bool& returnToPrevious) {
+    clearConsole();
+    cout << "AUTOMATED TEST - RANDOM PROCESS GENERATION\n";
+    cout << "==========================================\n\n";
+    
+    // Use the specific queue configuration: 3 queues with time quanta {4, 8, INT_MAX}
+    MLQ_Scheduler mlqScheduler(3, {4, 8, INT_MAX});
+    
+    // Display queue configuration first
+    cout << "Queue Configuration:\n";
+    cout << "Queue 0: RR with quantum = 4 (Highest Priority)\n";
+    cout << "Queue 1: RR with quantum = 8 (Medium Priority)\n";
+    cout << "Queue 2: FCFS (No Time Quantum) (Lowest Priority)\n";
+    cout << endl;
+    
+    int numProcesses = getPositiveInput("Enter number of processes to generate (or 0 to return): ", true);
+    
+    if (numProcesses == 0) {
+        returnToPrevious = true;
+        return;
+    }
+    
+    if (numProcesses < 1) {
+        cout << "Invalid number of processes!\n";
+        cout << "Press Enter to continue...";
+        cin.ignore();
+        cin.get();
+        returnToPrevious = true;
+        return;
+    }
+    
+    int maxArrival = getPositiveInput("Maximum arrival time: ");
+    int maxBurst = getPositiveInput("Maximum burst time: ");
+    
+    if (maxBurst == 0) {
+        cout << "Maximum burst time cannot be zero!\n";
+        cout << "Press Enter to continue...";
+        cin.ignore();
+        cin.get();
+        returnToPrevious = true;
+        return;
+    }
+    
+    int maxPriority = getPositiveInput("Maximum priority: ");
+    if (maxPriority == 0) {
+        cout << "Maximum priority cannot be zero!\n";
+        cout << "Press Enter to continue...";
+        cin.ignore();
+        cin.get();
+        returnToPrevious = true;
+        return;
+    }
+    
+    // Seed random number generator
+    srand(time(0));
+    
+    cout << "\nGenerated Processes:\n";
+    for (int i = 1; i <= numProcesses; i++) {
+        string processId = "P" + to_string(i);
+        int arrivalTime = rand() % (maxArrival + 1);
+        int burstTime = 1 + rand() % maxBurst; // Minimum burst time of 1
+        int priority = 1 + rand() % maxPriority; // Priority from 1 to maxPriority
+        int queueLevel = rand() % 3; // Random queue level between 0 and 2
+        
+        // Use MLQ-specific addProcess with queue level
+        mlqScheduler.addProcess(processId, arrivalTime, burstTime, priority, queueLevel);
+        cout << processId << "(" << arrivalTime << "," << burstTime << "," << priority << ",Q" << queueLevel << ") ";
+        
+        if (i % 3 == 0) cout << endl; // New line every 3 processes for better formatting
+    }
+    cout << endl;
+    
+    cout << "\nPress Enter to execute scheduling (or any other key + Enter to cancel)...";
+    cin.ignore();
+    if (cin.get() != '\n') {
+        returnToPrevious = true;
+        return;
+    }
+    
+    mlqScheduler.executeScheduling();
+    mlqScheduler.printProcessInfo();
+    mlqScheduler.displayGanttChart();
+    mlqScheduler.printPerformanceMetrics();
+    
+    // After results are displayed, show return options
+    int returnChoice = displayReturnMenu();
+    switch (returnChoice) {
+        case 1:
+            returnToPrevious = true;
+            break;
+        case 2:
+            returnToPrevious = false;
+            break;
+        case 3:
+            exit(0);
+            break;
+    }
+}
 
 
 void runSJFTest(int testType) {
@@ -732,7 +938,7 @@ void runSJFTest(int testType) {
 }
 
 void runFCFSTest(int testType) {
-    // clearConsole();
+     clearConsole();
     FCFS_Scheduler scheduler;
     bool returnToPrevious = false;
     
@@ -758,7 +964,7 @@ void runFCFSTest(int testType) {
 }
 
 void runPriorityTest(int testType) {
-    // clearConsole();
+     clearConsole();
     PP_Scheduler scheduler;
     bool returnToPrevious = false;
     
@@ -784,32 +990,29 @@ void runPriorityTest(int testType) {
 }
 
 void runMultiLevelQueueTest(int testType) {
-    // clearConsole();
-    cout << "MULTI-LEVEL QUEUE SCHEDULING\n";
-    cout << "============================\n\n";
+     clearConsole();
+    clearConsole();
+    MLQ_Scheduler scheduler;
+    bool returnToPrevious = false;
     
-    cout << "Multi-level Queue Scheduling - Feature Not Yet Implemented\n";
-    cout << "This scheduling algorithm is currently under development.\n";
-    cout << "Please check back in a future update.\n\n";
-    
-    if (testType == 1) {
-        cout << "Custom Test selected\n";
-    } else if (testType == 2) {
-        cout << "Automated Test selected\n";
-    }
-    
-    cout << "\nPress Enter to continue...";
-    cin.ignore();
-    cin.get();
-    
-    int returnChoice = displayReturnMenu();
-    if (returnChoice == 1) {
-        return;
-    } else if (returnChoice == 2) {
-        return;
-    } else if (returnChoice == 3) {
-        exit(0);
-    }
+    do {
+        switch (testType) {
+            case 1:
+                runCustomTest(scheduler, returnToPrevious);
+                break;
+            case 2:
+                runAutomatedTest(scheduler, returnToPrevious);
+                break;
+            default:
+                return;
+        }
+        
+        // If returnToPrevious is true, we break out to go back to test menu
+        // If false, we break out to go to main menu
+        if (!returnToPrevious) {
+            break;
+        }
+    } while (true);
 }
 
 int main() {
@@ -887,6 +1090,8 @@ int main() {
                     
                     switch (testChoice) {
                         case 1:
+                            runMultiLevelQueueTest(testChoice);
+                            break;
                         case 2:
                             runMultiLevelQueueTest(testChoice);
                             break;

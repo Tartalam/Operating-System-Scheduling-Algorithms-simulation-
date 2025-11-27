@@ -41,11 +41,11 @@ public:
     void clearProcessesPP();
 
     //scheduling operations
-    void executeScheduling();
-    void printProcessInfo() const;
+    virtual void executeScheduling();
+    virtual void printProcessInfo() const;
     void printProcessInfoNoPriority() const;
     void displayExecutionOrder() const;
-    void displayGanttChart() const;
+    virtual void displayGanttChart() const;
     void setTotalExecutionTime(int value);
     void setIdleTime(int value);
 
