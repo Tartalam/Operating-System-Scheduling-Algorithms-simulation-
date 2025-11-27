@@ -869,6 +869,7 @@ int main() {
                     
                     switch (testChoice) {
                         case 1:
+                            runPriorityTest(testChoice);
                         case 2:
                             runPriorityTest(testChoice);
                             break;
