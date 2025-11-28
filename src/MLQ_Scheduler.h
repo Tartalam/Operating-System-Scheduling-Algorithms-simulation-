@@ -1,8 +1,8 @@
-//Author: Jahmari Harrison
+//Author: Dejonte Maxwell
 //Date: 2023-10-03
 //Description: Header file for Multi-Level Queue Scheduler class definition.
-//ID: 2304204
-//Attributions: This code wsa completed witht he help from exteranl libraries.
+//ID: 2301519
+//Attributions: This code was completed witht he help from exteranl libraries.
 #ifndef MLQ_SCHEDULER_H
 #define MLQ_SCHEDULER_H
 

@@ -1,7 +1,7 @@
-//Author: Jahmari Harrison
+//Author: Demonia Chung
 //Date: 2023-10-15
 //Description: Header file for First-Come, First-Served (FCFS) Scheduler
-//ID: 2304204
+//ID: 2307612
 //Attributions: This code wsa completed with the help from exteranl libraries.
 #ifndef FCFS_SCHEDULER_H
 #define FCFS_SCHEDULER_H

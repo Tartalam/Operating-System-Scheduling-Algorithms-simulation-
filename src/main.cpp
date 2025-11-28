@@ -511,20 +511,6 @@ void runAutomatedTest(FCFS_Scheduler& scheduler, bool& returnToPrevious) {
     
     scheduler.clearProcesses();
     
-    // Ask about priority usage
-    char usePriority;
-    cout << "Use priority in scheduling? (y/n): ";
-    cin >> usePriority;
-    usePriority = tolower(usePriority);
-    
-    if (usePriority != 'y' && usePriority != 'n') {
-        cout << "Invalid choice! Please enter 'y' or 'n'.\n";
-        cout << "Press Enter to continue...";
-        cin.ignore();
-        cin.get();
-        returnToPrevious = true;
-        return;
-    }
     
     int numProcesses = getPositiveInput("Enter number of processes to generate (or 0 to return): ", true);
     
@@ -554,18 +540,7 @@ void runAutomatedTest(FCFS_Scheduler& scheduler, bool& returnToPrevious) {
         return;
     }
     
-    int maxPriority = 0;
-    if (usePriority == 'y') {
-        maxPriority = getPositiveInput("Maximum priority: ");
-        if (maxPriority == 0) {
-            cout << "Maximum priority cannot be zero when using priority!\n";
-            cout << "Press Enter to continue...";
-            cin.ignore();
-            cin.get();
-            returnToPrevious = true;
-            return;
-        }
-    }
+
     
     // Seed random number generator
     srand(time(0));
@@ -576,16 +551,11 @@ void runAutomatedTest(FCFS_Scheduler& scheduler, bool& returnToPrevious) {
         int arrivalTime = rand() % (maxArrival + 1);
         int burstTime = 1 + rand() % maxBurst; // Minimum burst time of 1
         
-        if (usePriority == 'y') {
-            int priority = 1 + rand() % maxPriority; // Priority from 1 to maxPriority
-            // Use overloaded addProcess with priority
-            scheduler.addProcess(processId, arrivalTime, burstTime, priority);
-            cout << processId << "(" << arrivalTime << "," << burstTime << "," << priority << ") ";
-        } else {
-            // Use overloaded addProcess without priority
-            scheduler.addProcess(processId, arrivalTime, burstTime);
-            cout << processId << "(" << arrivalTime << "," << burstTime << ") ";
-        }
+     
+        // Use overloaded addProcess without priority
+        scheduler.addProcess(processId, arrivalTime, burstTime);
+        cout << processId << "(" << arrivalTime << "," << burstTime << ") ";
+        
         
         if (i % 4 == 0) cout << endl;
     }

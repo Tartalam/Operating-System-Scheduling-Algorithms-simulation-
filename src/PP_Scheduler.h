@@ -1,7 +1,7 @@
-//Author: Jahmari Harrison
+//Author: Alaina Preston
 //Date: 2023-10-15
 //Description: Header file for Preemptive Priority Scheduler class definition.
-//ID: 2304204
+//ID: 2307651
 //Attributions: This code wsa completed with the help from exteranl libraries.
 #ifndef PP_SHCEDULER_H
 #define PP_SHCEDULER_H

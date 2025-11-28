@@ -1,7 +1,7 @@
-//Author: Jahmari Harrison
+//Author's: Jahmari Harrison', Alaina Preston, Dejonte Maxwell, Demonia Chung
 //Date: 2023-10-10
-//Description: Implementation file for SJF Scheduler class representing a system process.
-//ID: 2304204
+//Description: Implementation file for all the scheduling algorithms.
+//ID: 2304204, 2307651, 2301519, 2307612
 //Attributions: This code wsa completed witht he help from exteranl libraries and resources including StackOverflow and GeeksforGeeks for console handling techniques.
 
 #include "SJFScheduler.h"
@@ -424,7 +424,6 @@ void SJFScheduler::printPerformanceMetrics() const {
 
 //FCFS_Scheduler Class Implementation are below here
 //FCFS Scheduler Implementation
-
 void FCFS_Scheduler::executeScheduling() {
     if (processes.empty()) {
         cout << "No processes to schedule." << endl;
@@ -434,17 +433,10 @@ void FCFS_Scheduler::executeScheduling() {
     completedProcesses.clear();
     calculateFCFS();
     
-    // Use the inherited performance metrics display
-    // printPerformanceMetrics();
 }
 
 //method to calculate FCFS scheduling
 void FCFS_Scheduler::calculateFCFS() {
-    // Sort processes by arrival time
-    // sort(processes.begin(), processes.end(), 
-    //      [](const Process &a, const Process &b) {
-    //          return a.getArrivalTime() < b.getArrivalTime();
-    //      });
 
     sortByArrivalTime();
     
@@ -510,8 +502,11 @@ void PP_Scheduler::calculatePP() {
     int trackIdleTime = 0;
     
     Process* currentProcess = nullptr;
+    Process* lastRecordedProcess = nullptr;
     int currentProcessIndex = -1;
     int previousTime = 0;
+    int lastRecordedTime = 0;
+
 
     cout << "Starting Preemptive Priority Scheduling..." << endl;
     cout << "Execution Order: ";
@@ -519,6 +514,17 @@ void PP_Scheduler::calculatePP() {
     
 
     while (completedCount < n) {
+
+        if (currentProcess != lastRecordedProcess) {
+            // Process changed, record the previous segment if it existed
+            if (lastRecordedProcess != nullptr && lastRecordedTime < currentTime) {
+                executionHistory.push_back(make_pair(lastRecordedProcess->getProcessId(), 
+                                               make_pair(lastRecordedTime, currentTime)));
+            }
+            // Update for new process
+            lastRecordedProcess = currentProcess;
+            lastRecordedTime = currentTime;
+        }
         // Add all processes that have arrived by currentTime to the ready queue
         for (int i = 0; i < n; i++) {
             if (tempProcesses[i].getArrivalTime() <= currentTime && 
@@ -560,6 +566,7 @@ void PP_Scheduler::calculatePP() {
             if (nextIndex == -1) continue;
 
             // If a different process is being scheduled, show the transition
+            // this code was derived with the help of Stack Overflow
             if (currentProcess == nullptr || 
                 currentProcess->getProcessId() != tempProcesses[nextIndex].getProcessId()) {
                 
@@ -567,9 +574,7 @@ void PP_Scheduler::calculatePP() {
                     // Show completion of previous process segment
                     cout << currentProcess->getProcessId() << "(" << previousTime << "-" << currentTime << ") ";
 
-                    //record the completed segment of the previous process
-                    executionHistory.push_back(make_pair(tempProcesses[nextIndex].getProcessId(), 
-                                   make_pair(previousTime, currentTime)));
+                   
                 }
                 
                 currentProcess = &tempProcesses[nextIndex];
@@ -588,8 +593,7 @@ void PP_Scheduler::calculatePP() {
             currentTime++;
 
             // record the final segment of the process execution
-            executionHistory.push_back(make_pair(tempProcesses[nextIndex].getProcessId(), 
-                                   make_pair(previousTime, currentTime)));
+            
 
             // Check if process completed
             if (remainingTime[nextIndex] == 0) {
@@ -616,8 +620,7 @@ void PP_Scheduler::calculatePP() {
                 currentProcessIndex = -1;
             } else if(!readyQueuePP.empty() && readyQueuePP.top().getPriority() < currentProcess->getPriority()) {
                 //current process is preempted by higher priority process
-                executionHistory.push_back(make_pair(currentProcess->getProcessId(), 
-                                                   make_pair(previousTime, currentTime)));
+                
                 
             }
         } else {
@@ -644,17 +647,34 @@ void PP_Scheduler::calculatePP() {
                 }
             }
         }
+        //Record the onging process when the loop ends
+        if (currentProcess != lastRecordedProcess) {
+            // Process changed, record the previous segment if it existed
+            if (lastRecordedProcess != nullptr && lastRecordedTime < currentTime) {
+                executionHistory.push_back(make_pair(lastRecordedProcess->getProcessId(), 
+                                               make_pair(lastRecordedTime, currentTime)));
+            }
+            // Update for new process
+            lastRecordedProcess = currentProcess;
+            lastRecordedTime = currentTime;
+        }
+
     }
 
     // Handle the last process segment if any
     if (currentProcess != nullptr) {
         cout << currentProcess->getProcessId() << "(" << previousTime << "-" << currentTime << ") ";
     
-        executionHistory.push_back(make_pair(currentProcess->getProcessId(), 
-                                   make_pair(previousTime, currentTime)));
-      }
+    
+    }
 
     int totalTime = currentTime;
+
+    // Record the final segment if there is one
+    if (lastRecordedProcess != nullptr && lastRecordedTime < currentTime) {
+        executionHistory.push_back(make_pair(lastRecordedProcess->getProcessId(), 
+                                       make_pair(lastRecordedTime, currentTime)));
+    }
     
     cout << "\nPreemptive Priority Scheduling Completed." << endl;
     setIdleTime(trackIdleTime);
@@ -676,6 +696,7 @@ void PP_Scheduler::executeScheduling() {
 }
 
 //display Gantt chart for Preemptive Priority Scheduling
+// formating of this gnatt chart was derived with the help of AI.
 void PP_Scheduler::displayGanttChart() const {
     if (executionHistory.empty()) {
         cout << "No execution history to display Gantt chart." << endl;
@@ -684,18 +705,44 @@ void PP_Scheduler::displayGanttChart() const {
 
     cout << "\nPreemptive Priority Gantt Chart:" << endl;
     cout << "Time:  ";
+
+    vector<pair<string, pair<int, int>>> combinedHistory;
+
+    if(!executionHistory.empty()){
+        string currentProcess = executionHistory[0].first;
+        int startTime = executionHistory[0].second.first;
+        int endTime = executionHistory[0].second.second;
+
+        for (size_t i = 1; i < executionHistory.size(); i++ ){
+
+            const auto& segment = executionHistory[i];
+            //if the process is the same and consecutive in time, merge
+            if(segment.first ==  currentProcess && segment.second.first == endTime){
+                endTime = segment.second.second;
+            }else{
+                // if different process or non-consecutive, push merged segment
+                combinedHistory.push_back(make_pair(currentProcess, make_pair(startTime, endTime)));
+
+                // Start a new segment
+                currentProcess = segment.first;
+                startTime = segment.second.first;
+                endTime = segment.second.second;
+            }
+
+        }
+
+        //push the last segment
+        combinedHistory.push_back(make_pair(currentProcess, make_pair(startTime, endTime)));
+
+    }
+
     
-    for (const auto &segment : executionHistory) {
+    for (const auto &segment : combinedHistory) {
         cout << "| " << segment.first << " (" << segment.second.first << "-" << segment.second.second << ") ";
     }
     cout << "|" << endl;
     
-    // Also show the timeline
-    cout << "       ";
-    for (const auto &segment : executionHistory) {
-        cout << segment.second.first << "    " << segment.second.second << "   ";
-    }
-    cout << endl;
+
 }
 
 //print process info for Preemptive Priority Scheduling
@@ -761,6 +808,7 @@ void MLQ_Scheduler::setNumberOfQueues(int numQueues) {
     initializeQueues(numQueues);
 }
 
+//Calculate MLQ Scheduling
 void MLQ_Scheduler::calculateMLQ() {
     if (processes.empty()) return;
 
@@ -960,12 +1008,12 @@ void MLQ_Scheduler::displayGanttChart() const {
     }
     cout << "|" << endl;
 
-    // Also show the timeline
-    cout << "       ";
-    for (const auto &segment : executionHistory) {
-        cout << segment.second.first << "    " << segment.second.second << "   ";
-    }
-    cout << endl;
+    // // Also show the timeline
+    // cout << "       ";
+    // for (const auto &segment : executionHistory) {
+    //     cout << segment.second.first << "    " << segment.second.second << "   ";
+    // }
+    // cout << endl;
 
     //Show queue configurations
     cout << "\nQueue Configurations:" << endl;
