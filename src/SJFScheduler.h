@@ -2,6 +2,7 @@
 //Date: 2023-10-03
 //Description: Header file for scheduler class representing a system process.
 //ID: 2304204
+//Attributions: This code wsa completed witht he help from exteranl libraries.
 #ifndef SJFSCHEDULER_H
 #define SJFSCHEDULER_H
 

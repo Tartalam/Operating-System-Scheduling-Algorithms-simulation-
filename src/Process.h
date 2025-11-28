@@ -2,6 +2,7 @@
 //Date: 2023-10-03
 //Description: Header file for Process class definition.
 //ID: 2304204
+//Attributions: This code wsa completed witht he help from exteranl libraries.
 #ifndef PROCESS_H
 #define PROCESS_H
 
