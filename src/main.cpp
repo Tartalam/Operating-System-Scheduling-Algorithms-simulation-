@@ -1,3 +1,9 @@
+//Author: Jahmari Harrison
+//Date: 2023-10-20
+//Description: Implementation file for main program to run CPU scheduling simulations.
+//ID: 2304204
+//Attributions: This code wsa completed witht the help fo exteranl libraries and resources including StackOverflow and GeeksforGeeks for console handling techniques.
+
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -83,6 +89,8 @@ int displayReturnMenu() {
     return getChoiceWithReturn(1, 3);
 }
 
+// Get choice input with optional return option
+//this method was derived witht he help from code found on StackOverflow
 int getChoiceWithReturn(int minChoice, int maxChoice, bool showReturnOption) {
     int choice;
     while (true) {
@@ -117,6 +125,8 @@ int getChoiceWithReturn(int minChoice, int maxChoice, bool showReturnOption) {
     }
 }
 
+// Get positive integer input with optional zero allowance
+//this method was derived witht he help from code found on StackOverflow 
 int getPositiveInput(const string& prompt, bool allowZero) {
     int value;
     while (true) {

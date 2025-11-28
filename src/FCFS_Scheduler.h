@@ -1,3 +1,8 @@
+//Author: Jahmari Harrison
+//Date: 2023-10-15
+//Description: Header file for First-Come, First-Served (FCFS) Scheduler
+//ID: 2304204
+//Attributions: This code wsa completed with the help from exteranl libraries.
 #ifndef FCFS_SCHEDULER_H
 #define FCFS_SCHEDULER_H
 
@@ -10,9 +15,7 @@ using namespace std;
 
 class FCFS_Scheduler : public SJFScheduler {
 private:
-    // Use inherited constructors and methods
-    
-    // Method to calculate FCFS scheduling
+
     void calculateFCFS();
     
 public:

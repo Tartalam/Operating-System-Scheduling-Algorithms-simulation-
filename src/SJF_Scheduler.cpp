@@ -2,6 +2,7 @@
 //Date: 2023-10-10
 //Description: Implementation file for SJF Scheduler class representing a system process.
 //ID: 2304204
+//Attributions: This code wsa completed witht he help from exteranl libraries and resources including StackOverflow and GeeksforGeeks for console handling techniques.
 
 #include "SJFScheduler.h"
 #include "Process.h"
@@ -95,7 +96,8 @@ void Process::displayProcessInfoWithQueueLevel() const {
 
 //SJFScheduler Class Implementation
 SJFScheduler::SJFScheduler() {}
-// FCFS_Scheduler::FCFS_Scheduler() : SJFScheduler() {}
+
+//method to add process by Process object
 void SJFScheduler::addProcess(const Process& process){
   processes.push_back(process);
 }
@@ -110,6 +112,7 @@ void SJFScheduler::addProcess(const string processId, int arrivalTime, int burst
   processes.push_back(Process(processId, arrivalTime, burstTime, -1)); //default priority 0
 }
 
+//clear all processes from scheduler
 void SJFScheduler::clearProcesses(){
   processes.clear();
   completedProcesses.clear();
@@ -117,13 +120,11 @@ void SJFScheduler::clearProcesses(){
   readyQueue = priority_queue<Process, vector<Process>, CompareBurstTime>();
 }
 
+//clear all processes from scheduler for priority preemptive
 void SJFScheduler::clearProcessesPP(){
+  
   processes.clear();
   completedProcesses.clear();
-  // Clear the priority queue creating a new empty one
-  // while (!readyQueue.empty()) {
-  //     readyQueue.pop();
-  // }
   readyQueuePP = priority_queue<Process, vector<Process>, ComparePriority>();
 }
 
@@ -244,6 +245,7 @@ void SJFScheduler::printProcessInfo() const {
       break;
     }
     }
+
   if (hasPriority) {
 
   cout << "SJF Scheduling Results: (USing priority Queue/Min-Heap):" << endl;
@@ -278,7 +280,7 @@ void SJFScheduler::printProcessInfoNoPriority() const {
        << setw(12) << "Arrival"
        << setw(10) << "Burst"
        << setw(12) << "Waiting"
-       <<setw(12) <<  "Response"
+       << setw(12) <<  "Response"
        << setw(15) << "Turnaround"
        << setw(16) << "Completion"
        << endl;
@@ -360,9 +362,18 @@ int SJFScheduler::getIdleTime() const {
 }
 
 //calculates CPU utilization
-float SJFScheduler::getCPUUtilization() const {
-  if (getTotalExecutionTime() == 0) return 0;
-  return static_cast<float>(((getTotalExecutionTime() - getIdleTime()) /getTotalExecutionTime()) * 100.0f);
+float SJFScheduler::getCPUUtilization() const { 
+
+    int totalExecuteTime = getTotalExecutionTime();
+    int idleT = getIdleTime();
+
+    if(totalExecuteTime > 0){
+        float cpuUtil = ((totalExecuteTime - idleT) / static_cast<float>(totalExecuteTime)) * 100.0f;
+        return cpuUtil;
+    }else{
+        return 0.0f;
+    }
+
 }
 
 //count amount of processes in queue
