@@ -63,3 +63,102 @@ This is a C++ implementation of four CPU scheduling algorithms for our Operating
    ```bash
    git clone https://github.com/Tartalam/Operating-System-Scheduling-Algorithms-simulation-
    cd Operating-System-Scheduling-Algorithms-simulation-
+2. **Build using Makefile**
+   ```bash
+   make
+3. **Run the program**
+   ```bash
+   make file
+
+### 🔄 Alternative Manual Build
+if you dont have maek, compile manually:
+```bash
+cd src
+g++ -std=c++11 -o scheduling_simulator *.cpp
+./scheduling_simulator
+```
+
+###⚙️ Build Options
+Command |	Description
+--------|------------
+make debug  |  Build with debug symbols
+make clean  |  Remove build files
+make rebuild  |  Clean and rebuild
+make run  |  Build and run immediately
+
+### 🎮 How to Use
+
+## 🏃 Running the Program
+
+1. Execute the program using the instructions above
+
+2. Select an algorithm from the main menu (1-4)
+
+2, Choose test type:
+
+  * Custom Test: Enter process details manually
+
+  * Automated Test: Generate random processes
+
+## 📥 Input Format
+
+* Arrival Time: When the process arrives
+
+* Burst Time: How long it needs the CPU
+
+* Priority (for Priority and MLQ): Lower number = higher priority
+
+* Queue Level (for MLQ only): 0, 1, or 2
+
+### 💡 Example Usage
+```text
+=============================================
+      CPU SCHEDULING ALGORITHMS SIMULATOR
+=============================================
+1. Shortest Job First (SJF) - Non-preemptive
+2. First Come First Served (FCFS)
+3. Priority Scheduling (Preemptive)
+4. Multi-level Queue Scheduling
+5. Exit
+=============================================
+```
+
+### 📊 Program Output
+
+The program displays:
+
+* 🎯 Process execution order
+
+* 📈 Gantt chart showing timeline
+
+* 📋 Detailed table with calculated times
+
+* ⚖️ Performance metrics comparison
+
+* 💻 CPU utilization and throughput
+
+### 🧪 Sample Test Case
+
+Testing SJF with:
+
+8 P1: Arrival=0, Burst=6
+
+* P2: Arrival=1, Burst=4
+
+* P3: Arrival=2, Burst=2
+
+Expected: P1 runs first but gets preempted by shorter jobs
+
+### 🔬 Technical Details
+
+* Language: C++11
+
+* Data Structures: Vectors, priority queues, standard queues
+
+* Time Complexity: O(n log n) for priority-based algorithms
+
+* File Structure: Header files for each scheduler with implementation in SJF_Scheduler.cpp
+
+### 🎓 Academic Context
+
+This project was completed for Year 3 Semester 1 Operating Systems course at University of Technology, Jamaica, demonstrating practical implementation of theoretical scheduling concepts.
