@@ -15,6 +15,7 @@
 #include "FCFS_Scheduler.h"
 #include "PP_Scheduler.h"
 #include "MLQ_Scheduler.h"
+#include <windows.h>
 
 
 using namespace std;
@@ -40,9 +41,30 @@ int getChoiceWithReturn(int minChoice, int maxChoice, bool showReturnOption = fa
 int getPositiveInput(const string& prompt, bool allowZero = false);
 
 void clearConsole() {
-    // Moves cursor to home position (1,1) and clears screen from cursor to end
-    std::cout << "\033[H\033[2J"; 
-    std::cout.flush(); // Ensure the output is sent immediately
+    // // Moves cursor to home position (1,1) and clears screen from cursor to end
+    // std::cout << "\033[H\033[2J"; 
+    // std::cout.flush(); // Ensure the output is sent immediately
+
+    // // Moves the cursor to the top-left corner (1,1)
+    // std::cout << "\x1b[1;1H"; 
+    // // Clears the entire screen from the cursor position
+    // std::cout << "\x1b[2J"; 
+    // std::cout << std::flush; // Ensure immediate output
+
+    COORD topLeft  = { 0, 0 };
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO screen;
+    DWORD written;
+
+    GetConsoleScreenBufferInfo(console, &screen);
+    FillConsoleOutputCharacterA(
+        console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written
+    );
+    FillConsoleOutputAttribute(
+        console, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
+        screen.dwSize.X * screen.dwSize.Y, topLeft, &written
+    );
+    SetConsoleCursorPosition(console, topLeft);
 }
 
    
@@ -80,7 +102,7 @@ int displayTestMenu(const string& algorithmName) {
 }
 
 int displayReturnMenu() {
-    clearConsole();
+    // clearConsole();
     cout << "\n=============================================\n"
          << "1. Return to Previous Menu\n"
          << "2. Return to Main Menu\n"
