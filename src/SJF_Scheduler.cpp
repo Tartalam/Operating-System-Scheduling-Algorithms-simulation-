@@ -525,6 +525,7 @@ void PP_Scheduler::calculatePP() {
             lastRecordedProcess = currentProcess;
             lastRecordedTime = currentTime;
         }
+        
         // Add all processes that have arrived by currentTime to the ready queue
         for (int i = 0; i < n; i++) {
             if (tempProcesses[i].getArrivalTime() <= currentTime && 

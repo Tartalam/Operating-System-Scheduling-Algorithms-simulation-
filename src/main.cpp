@@ -1,7 +1,7 @@
-//Author: Jahmari Harrison
+//Author: Nicholas Redwood
 //Date: 2023-10-20
 //Description: Implementation file for main program to run CPU scheduling simulations.
-//ID: 2304204
+//ID: 2210210
 //Attributions: This code wsa completed witht the help fo exteranl libraries and resources including StackOverflow and GeeksforGeeks for console handling techniques.
 
 #include <iostream>

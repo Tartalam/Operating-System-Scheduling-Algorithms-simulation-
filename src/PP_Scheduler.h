@@ -19,6 +19,7 @@ private:
     void calculatePP();
 
     vector<pair<string, pair<int, int>>> executionHistory;
+    
 public:
     void printProcessInfo() const;
     void displayGanttChart() const;
